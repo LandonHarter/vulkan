@@ -19,7 +19,7 @@ public class Pipeline {
     private final long vkPipeline;
     private final long vkPipelineLayout;
 
-    public Pipeline(PipelineCache pipelineCache, Pipeline.PipeLineCreationInfo pipeLineCreationInfo, long descriptorSetLayout) {
+    public Pipeline(PipelineCache pipelineCache, Pipeline.PipeLineCreationInfo pipeLineCreationInfo) {
         Logger.debug("Creating pipeline");
         device = pipelineCache.getDevice();
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -92,7 +92,6 @@ public class Pipeline {
 
             VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo = VkPipelineLayoutCreateInfo.calloc(stack)
                     .sType(VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO)
-                    .pSetLayouts(stack.longs(descriptorSetLayout))
                     .pPushConstantRanges(vpcr);
 
             vkCheck(vkCreatePipelineLayout(device.getVkDevice(), pPipelineLayoutCreateInfo, null, lp),

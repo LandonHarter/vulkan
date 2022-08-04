@@ -180,6 +180,7 @@ public class VulkanModel {
     }
 
     public record VulkanMesh(VulkanBuffer verticesBuffer, VulkanBuffer indicesBuffer, int numIndices) {
+
         public void cleanup() {
             verticesBuffer.cleanup();
             indicesBuffer.cleanup();

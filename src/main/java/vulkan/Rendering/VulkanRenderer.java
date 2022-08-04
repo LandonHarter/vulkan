@@ -3,6 +3,7 @@ package vulkan.Rendering;
 import engine.Matrix4;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.lwjgl.PointerBuffer;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.util.shaderc.Shaderc;
@@ -25,10 +26,12 @@ import vulkan.SwapChain.SwapChainRenderPass;
 import vulkan.Vertex.VertexBufferStructure;
 
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.lwjgl.vulkan.VK10.*;
 
@@ -76,7 +79,7 @@ public class VulkanRenderer {
                     });
             Pipeline.PipeLineCreationInfo pipeLineCreationInfo = new Pipeline.PipeLineCreationInfo(
                     renderPass.getVkRenderPass(), shader, 1, true, GraphConstants.MAT4X4_SIZE * 3, new VertexBufferStructure());
-            pipeLine = new Pipeline(pipelineCache, pipeLineCreationInfo, render.descriptorSetLayout);
+            pipeLine = new Pipeline(pipelineCache, pipeLineCreationInfo);
             pipeLineCreationInfo.cleanup();
 
             commandBuffers = new CommandBuffer[numImages];

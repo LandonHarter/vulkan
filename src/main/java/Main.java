@@ -13,13 +13,9 @@ public class Main {
 
     private static VulkanRenderer vulkanRenderer;
 
-    private static long fpsTimer;
-    private static int fps;
-
     protected static void Start() {
         Window.CreateWindow();
         Vulkan.VulkanSettings vk = new Vulkan.VulkanSettings();
-        vk.vSync = false;
         Vulkan.Create(vk);
         Camera.init();
 
@@ -27,15 +23,9 @@ public class Main {
         Vulkan.AddRenderer(vulkanRenderer);
 
         Initialize();
+
         while (!Window.ShouldClose()) {
             Update();
-
-            fps++;
-            if (System.currentTimeMillis() - fpsTimer > 1000) {
-                System.out.println("FPS: " + fps);
-                fps = 0;
-                fpsTimer = System.currentTimeMillis();
-            }
         }
 
         Vulkan.Destroy();
@@ -44,7 +34,6 @@ public class Main {
 
     protected static void Update() {
         Camera.calculateView();
-
         GLFW.glfwPollEvents();
         Vulkan.Render();
     }

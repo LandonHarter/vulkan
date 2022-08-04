@@ -7,6 +7,7 @@ public class Window {
 
     private static long window;
     private static int width, height;
+    public static String title;
 
     private static boolean resized;
 
@@ -20,6 +21,7 @@ public class Window {
         window = GLFW.glfwCreateWindow(1920, 1080, "Vulkan", 0, 0);
         width = 1920;
         height = 1080;
+        title = "Vulkan";
 
         GLFW.glfwSetFramebufferSizeCallback(window, (window, w, h) -> Resize(w, h));
     }
@@ -34,6 +36,10 @@ public class Window {
         resized = true;
         width = w;
         height = h;
+    }
+
+    public static void SetTitle(String title) {
+        GLFW.glfwSetWindowTitle(window, title);
     }
 
     public static void ResetResized() {
