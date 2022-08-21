@@ -31,8 +31,6 @@ public class ModelLoader {
         if (numOfMeshes > 0) {
             for (int i = 0; i < numOfMeshes; i++) {
                 AIMesh mesh = AIMesh.create(scene.mMeshes().get(node.mMeshes().get(i)));
-
-
                 AIVector3D.Buffer vertices = mesh.mVertices();
 
                 float[] position = new float[mesh.mNumVertices() * 3];

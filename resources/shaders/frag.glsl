@@ -5,5 +5,5 @@ layout(location = 0) in vec2 texCoord;
 
 void main()
 {
-    fragColor = vec4(1, 1, 1, 1);
+    fragColor = vec4(texCoord, 0, 1);
 }

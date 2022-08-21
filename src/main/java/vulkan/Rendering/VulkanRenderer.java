@@ -99,6 +99,7 @@ public class VulkanRenderer {
         renderPass.cleanup();
         Arrays.stream(commandBuffers).forEach(CommandBuffer::cleanup);
         Arrays.stream(fences).forEach(Fence::cleanup);
+        vulkanModels.forEach(VulkanModel::cleanup);
     }
 
     public void resize(SwapChain swapChain) {
@@ -142,10 +143,13 @@ public class VulkanRenderer {
         Logger.debug("Loaded {} model(s)", modelDataList.size());
     }
 
-    public void addMesh(ModelData modelData) {
+    public VulkanModel addMesh(ModelData modelData) {
+        VulkanModel model = VulkanModel.transformModels(modelData, commandPool, graphQueue);
         Logger.debug("Loading model...");
-        vulkanModels.add(VulkanModel.transformModels(modelData, commandPool, graphQueue));
+        vulkanModels.add(model);
         Logger.debug("Loaded model");
+
+        return model;
     }
 
     public void recordCommandBuffer(List<VulkanModel> vulkanModelList) {
@@ -206,13 +210,13 @@ public class VulkanRenderer {
                 String modelId = vulkanModel.getModelId();
 
                 for (VulkanModel.VulkanMesh mesh : vulkanModel.getVulkanMeshList()) {
-                    vertexBuffer.put(0, mesh.verticesBuffer().getBuffer());
+                    vertexBuffer.put(0, mesh.verticesBuffer.getBuffer());
                     vkCmdBindVertexBuffers(cmdHandle, 0, vertexBuffer, offsets);
-                    vkCmdBindIndexBuffer(cmdHandle, mesh.indicesBuffer().getBuffer(), 0, VK_INDEX_TYPE_UINT32);
+                    vkCmdBindIndexBuffer(cmdHandle, mesh.indicesBuffer.getBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
-                    setPushConstants(cmdHandle, Camera.projection, Camera.view, Matrix4.CalculateTransform(new Vector3f(0, 0, -3)),
+                    setPushConstants(cmdHandle, Camera.projection, Camera.view, mesh,
                             pushConstantBuffer);
-                    vkCmdDrawIndexed(cmdHandle, mesh.numIndices(), 1, 0, 0, 0);
+                    vkCmdDrawIndexed(cmdHandle, mesh.numIndices, 1, 0, 0, 0);
                 }
             }
 
@@ -221,11 +225,11 @@ public class VulkanRenderer {
         }
     }
 
-    private void setPushConstants(VkCommandBuffer cmdHandle, Matrix4f projMatrix, Matrix4f view, Matrix4f modelMatrix,
+    private void setPushConstants(VkCommandBuffer cmdHandle, Matrix4f projMatrix, Matrix4f view, VulkanModel.VulkanMesh mesh,
                                   ByteBuffer pushConstantBuffer) {
         projMatrix.get(pushConstantBuffer);
         view.get(GraphConstants.MAT4X4_SIZE, pushConstantBuffer);
-        modelMatrix.get(GraphConstants.MAT4X4_SIZE * 2, pushConstantBuffer);
+        mesh.getModelMatrix().get(GraphConstants.MAT4X4_SIZE * 2, pushConstantBuffer);
         vkCmdPushConstants(cmdHandle, pipeLine.getVkPipelineLayout(),
                 VK_SHADER_STAGE_VERTEX_BIT, 0, pushConstantBuffer);
     }

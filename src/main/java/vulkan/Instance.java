@@ -132,6 +132,7 @@ public class Instance {
             debugUtils.pfnUserCallback().free();
             debugUtils.free();
         }
+
         vkDestroyInstance(vkInstance, null);
     }
 

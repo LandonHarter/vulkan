@@ -1,7 +1,10 @@
 package vulkan.Model;
 
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.system.*;
 import org.lwjgl.vulkan.VkBufferCopy;
+import org.tinylog.Logger;
 import vulkan.Commands.CommandBuffer;
 import vulkan.Commands.CommandPool;
 import vulkan.Devices.Device;
@@ -168,6 +171,30 @@ public class VulkanModel {
         vulkanMeshList.forEach(VulkanMesh::cleanup);
     }
 
+    public void setPosition(Vector3f position) {
+        vulkanMeshList.forEach(mesh -> mesh.setPosition(position));
+    }
+
+    public void setRotation(Vector3f rotation) {
+        vulkanMeshList.forEach(mesh -> mesh.setRotation(rotation));
+    }
+
+    public void setScale(Vector3f scale) {
+        vulkanMeshList.forEach(mesh -> mesh.setScale(scale));
+    }
+
+    public void translate(Vector3f translation) {
+        vulkanMeshList.forEach(mesh -> mesh.translate(translation));
+    }
+
+    public void rotate(Vector3f rotation) {
+        vulkanMeshList.forEach(mesh -> mesh.rotate(rotation));
+    }
+
+    public void scale(Vector3f scale) {
+        vulkanMeshList.forEach(mesh -> mesh.scale(scale));
+    }
+
     public String getModelId() {
         return modelId;
     }
@@ -179,11 +206,69 @@ public class VulkanModel {
     private record TransferBuffers(VulkanBuffer srcBuffer, VulkanBuffer dstBuffer) {
     }
 
-    public record VulkanMesh(VulkanBuffer verticesBuffer, VulkanBuffer indicesBuffer, int numIndices) {
+    public static class VulkanMesh {
+
+        public VulkanBuffer verticesBuffer, indicesBuffer;
+        public int numIndices;
+
+        private Vector3f position = new Vector3f(), rotation = new Vector3f();
+        private Vector3f scale = new Vector3f(1);
+
+        private Matrix4f modelMatrix = new Matrix4f().identity();
+
+        public VulkanMesh(VulkanBuffer verticesBuffer, VulkanBuffer indicesBuffer, int numIndices) {
+            this.verticesBuffer = verticesBuffer;
+            this.indicesBuffer = indicesBuffer;
+            this.numIndices = numIndices;
+        }
 
         public void cleanup() {
             verticesBuffer.cleanup();
             indicesBuffer.cleanup();
         }
+
+        public void setPosition(Vector3f position) {
+            this.position = position;
+            calculateModelMatrix();
+        }
+
+        public void setRotation(Vector3f rotation) {
+            this.rotation = rotation;
+            calculateModelMatrix();
+        }
+
+        public void setScale(Vector3f scale) {
+            this.scale = scale;
+            calculateModelMatrix();
+        }
+
+        public void translate(Vector3f translation) {
+            position = position.add(translation);
+            calculateModelMatrix();
+        }
+
+        public void rotate(Vector3f rotation) {
+            this.rotation = this.rotation.add(rotation);
+            calculateModelMatrix();
+        }
+
+        public void scale(Vector3f scale) {
+            this.scale = this.scale.mul(scale);
+            calculateModelMatrix();
+        }
+
+        public Matrix4f getModelMatrix() {
+            return modelMatrix;
+        }
+
+        private void calculateModelMatrix() {
+            modelMatrix = new Matrix4f().identity();
+            modelMatrix.translate(position);
+            modelMatrix.rotate((float) Math.toRadians(rotation.x), new Vector3f(1, 0, 0));
+            modelMatrix.rotate((float) Math.toRadians(rotation.y), new Vector3f(0, 1, 0));
+            modelMatrix.rotate((float) Math.toRadians(rotation.z), new Vector3f(0, 0, 1));
+            modelMatrix.scale(scale);
+        }
+
     }
 }
